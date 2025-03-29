@@ -8,15 +8,19 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: write  # Allows write access to the contents (to commit files)
+      actions: read  # To allow reading actions logs
+
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -24,10 +28,10 @@ jobs:
 
     - name: Run scraper
       run: python scraper.py
-    
+
     - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git add data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update hottest place data" && git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update hottest place data" && git push)
