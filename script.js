@@ -23,4 +23,4 @@ function updateDisplay(data) {
 fetchHottestPlace();
 
 // Refresh data every 15 minutes
-setInterval(fetchHottestPlace, 15 * 60 * 1000);
+setInterval(fetchHottestPlace, 1 * 60 * 1000);
