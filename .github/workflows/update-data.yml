@@ -1,5 +1,7 @@
 name: Update Hottest Place Data
 
+working-directory: ${{ github.workspace }}
+
 on:
   schedule:
     - cron: '*/15 * * * *'  # Run every 15 minutes
