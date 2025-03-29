@@ -22,17 +22,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests beautifulsoup4
 
-    - name: List files in current directory
-      run: |
-        echo "Listing files:"
-        ls -la  # This will show all files, including hidden files, in the current directory.
-    
     - name: Run scraper
-      run: python scraper.py  # Ensure it's the correct file name and path.
+      run: python scraper.py
     
     - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git add data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update hottest place data" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update hottest place data" && git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git)
