@@ -4,20 +4,23 @@ on:
   schedule:
     - cron: '*/15 * * * *'  # Run every 15 minutes
   workflow_dispatch:  # Allow manual triggering
+  repository_dispatch:
+    types: [manual-trigger]  # Allows external triggers (e.g., Cron-Job.org)
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # Allows write access to the contents (to commit files)
-      actions: read  # To allow reading actions logs
+      contents: write  # Allows write access to repository files
+      actions: read  # Allows reading actions logs
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v4  # Updated to latest version
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4  # Updated to latest version
       with:
         python-version: '3.9'
 
@@ -34,4 +37,9 @@ jobs:
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git add data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update hottest place data" && git push)
+        if git diff --staged --quiet; then
+          echo "No changes to commit."
+        else
+          git commit -m "Update hottest place data"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+        fi
