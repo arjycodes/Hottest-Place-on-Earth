@@ -1,8 +1,8 @@
 name: Update Hottest Place Data
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'  # Run every 15 minutes
+  #schedule:
+  #  - cron: '*/15 * * * *'  # Run every 15 minutes
   workflow_dispatch:  # Allow manual triggering
   repository_dispatch:
     types: [manual-trigger]  # Allows external triggers (e.g., Cron-Job.org)
