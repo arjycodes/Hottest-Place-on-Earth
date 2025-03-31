@@ -1,6 +1,6 @@
 async function fetchHottestPlace() {
     try {
-        const response = await fetch('data.json');
+        const response = await fetch('data.json?' + new Date().getTime());;
         const data = await response.json();
         updateDisplay(data);
     } catch (error) {
