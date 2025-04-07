@@ -261,7 +261,7 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folde
         print(f"Successfully uploaded new version of {file_name} (ID: {new_file_id})")
         
         # Step 2: Find and delete ALL older versions with the same name throughout Drive
-        query = f"name = '{file_name}' and id != '{new_file_id}'"
+        query = f"name = '{file_name}' and not id = '{new_file_id}'"
         # Notice the folder_id condition has been removed to search all locations
             
         results = service.files().list(q=query, fields="files(id, name)").execute()
