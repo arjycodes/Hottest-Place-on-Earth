@@ -5,7 +5,7 @@ import pandas as pd
 import time
 import random
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -156,7 +156,7 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
     top_rank = next((city for city in rankings if city.get('rank') == 1), rankings[0])
     
     # Format the data according to the specified structure
-    current_time = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    current_time = datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p")
     
     # Extract country code from flag URL
     country_code = "unknown"
@@ -198,7 +198,7 @@ def save_data(df: pd.DataFrame) -> None:
         return
     
     # Add scraped_datetime column with current timestamp
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     df['scraped_datetime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Path to the consolidated CSV file
