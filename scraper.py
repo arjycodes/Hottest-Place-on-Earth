@@ -233,25 +233,47 @@ def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
     
     s3.upload_file(local_path, bucket_name, object_name)
 
-def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folder_id: str) -> None:
+def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> None:
     """
     Upload a file to Google Drive using a service account.
+    First uploads the new version, then deletes any previous versions with the same name.
     """
-    credentials = service_account.Credentials.from_service_account_file(
-        'google_credentials.json',
-        scopes=['https://www.googleapis.com/auth/drive.file']
-    )
-    service = build('drive', 'v3', credentials=credentials)
-    
-    # Specify the parent folder ID
-    file_metadata = {
-        'name': file_name,
-        'parents': [folder_id]  # This is the key change
-    }
-    
-    media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print(f"File ID: {file.get('id')}")
+    try:
+        # Set up credentials and service
+        credentials = service_account.Credentials.from_service_account_file(
+            'google_credentials.json',
+            scopes=['https://www.googleapis.com/auth/drive.file']
+        )
+        service = build('drive', 'v3', credentials=credentials)
+        
+        # Step 1: Upload the new file first
+        file_metadata = {'name': file_name}
+        media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
+        new_file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        new_file_id = new_file.get('id')
+        
+        if not new_file_id:
+            raise Exception("Failed to get ID for newly uploaded file")
+            
+        print(f"Successfully uploaded new version of {file_name} (ID: {new_file_id})")
+        
+        # Step 2: Find and delete older versions with the same name
+        query = f"name = '{file_name}' and id != '{new_file_id}'"
+        results = service.files().list(q=query, fields="files(id, name)").execute()
+        old_files = results.get('files', [])
+        
+        for old_file in old_files:
+            try:
+                service.files().delete(fileId=old_file['id']).execute()
+                print(f"Deleted old version of {file_name} (ID: {old_file['id']})")
+            except Exception as e:
+                print(f"Warning: Could not delete old file {old_file['id']}: {e}")
+                
+        return new_file_id
+    except Exception as e:
+        print(f"Failed to upload {file_name} to Google Drive: {e}")
+        raise
+
 
 
 
