@@ -56,7 +56,7 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> No
     """
     Upload a file to Google Drive.
     """
-    creds = Credentials.from_authorized_user_file('token.json', ['https://www.googleapis.com/auth/drive.file'])
+    creds = Credentials.from_authorized_user_file('google_credentials.json', ['https://www.googleapis.com/auth/drive.file'])
     service = build('drive', 'v3', credentials=creds)
 
     file_metadata = {'name': file_name}
@@ -274,7 +274,7 @@ def save_data(df: pd.DataFrame) -> None:
 
     # Try to upload to R2
     try:
-        upload_to_r2('rankings.db', 'your-r2-bucket', 'rankings.db')
+        upload_to_r2('rankings.db', 'weather-rankings-data', 'rankings.db')
         print("Data successfully uploaded to R2")
     except Exception as e:
         print(f"Failed to upload to R2: {e}")
