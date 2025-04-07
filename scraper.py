@@ -42,33 +42,6 @@ def save_to_duckdb(df: pd.DataFrame, connection: duckdb.DuckDBPyConnection) -> N
     connection.execute("CREATE TABLE IF NOT EXISTS rankings AS SELECT * FROM df")
     connection.execute("INSERT INTO rankings SELECT * FROM df")
 
-def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
-    """
-    Upload a file to Cloudflare R2.
-    """
-    s3 = boto3.client('s3',
-                      endpoint_url=os.environ['R2_ENDPOINT'],
-                      aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
-                      aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
-    
-    s3.upload_file(local_path, bucket_name, object_name)
-
-def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> None:
-    """
-    Upload a file to Google Drive using a service account.
-    """
-    credentials = service_account.Credentials.from_service_account_file(
-        'google_credentials.json',
-        scopes=['https://www.googleapis.com/auth/drive.file']
-    )
-    service = build('drive', 'v3', credentials=credentials)
-    file_metadata = {'name': file_name}
-    media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print(f"File ID: {file.get('id')}")
-
-
-
 def create_session() -> requests.Session:
     """
     Creates a requests session with retry capabilities and 
@@ -248,6 +221,40 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
     
     print("Top rank data saved to data.json")
 
+
+def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
+    """
+    Upload a file to Cloudflare R2.
+    """
+    s3 = boto3.client('s3',
+                      endpoint_url=os.environ['R2_ENDPOINT'],
+                      aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+                      aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+    
+    s3.upload_file(local_path, bucket_name, object_name)
+
+def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folder_id: str) -> None:
+    """
+    Upload a file to Google Drive using a service account.
+    """
+    credentials = service_account.Credentials.from_service_account_file(
+        'google_credentials.json',
+        scopes=['https://www.googleapis.com/auth/drive.file']
+    )
+    service = build('drive', 'v3', credentials=credentials)
+    
+    # Specify the parent folder ID
+    file_metadata = {
+        'name': file_name,
+        'parents': [folder_id]  # This is the key change
+    }
+    
+    media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    print(f"File ID: {file.get('id')}")
+
+
+
 def save_data(df: pd.DataFrame) -> None:
     """
     Save data to local CSV, DuckDB (local, R2), and Google Drive.
@@ -283,16 +290,19 @@ def save_data(df: pd.DataFrame) -> None:
     except Exception as e:
         print(f"Failed to upload to R2: {e}")
 
+    # Your shared folder ID from Google Drive
+    FOLDER_ID = "1uRt6TTIuG-3U9eSyI7FEzs7RrfIW8gn3"  # Get this from the URL when viewing the folder
+    
     # Try to upload DuckDB to Google Drive
     try:
-        upload_to_google_drive('rankings.db', 'rankings.db', 'application/octet-stream')
+        upload_to_google_drive('rankings.db', 'rankings.db', 'application/octet-stream',FOLDER_ID)
         print("DuckDB file successfully uploaded to Google Drive")
     except Exception as e:
         print(f"Failed to upload DuckDB to Google Drive: {e}")
 
     # Try to upload CSV to Google Drive
     try:
-        upload_to_google_drive(csv_path, 'consolidated_rankings.csv', 'text/csv')
+        upload_to_google_drive(csv_path, 'consolidated_rankings.csv', 'text/csv',FOLDER_ID)
         print("CSV backup successfully uploaded to Google Drive")
     except Exception as e:
         print(f"Failed to upload CSV to Google Drive: {e}")
