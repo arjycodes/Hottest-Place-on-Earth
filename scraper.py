@@ -10,6 +10,61 @@ from typing import List, Dict, Any
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+# New imports
+import duckdb
+import boto3
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
+from io import BytesIO
+
+def get_consolidated_data(source: str = 'local') -> pd.DataFrame:
+    """
+    Retrieve consolidated data from the specified source.
+    """
+    if source == 'local':
+        csv_path = "consolidated_rankings.csv"
+        if os.path.isfile(csv_path):
+            return pd.read_csv(csv_path)
+        else:
+            return pd.DataFrame()
+    elif source == 'r2':
+        # Implement R2 DuckDB file retrieval logic here
+        pass
+    else:
+        raise ValueError(f"Unsupported data source: {source}")
+
+def save_to_duckdb(df: pd.DataFrame, connection: duckdb.DuckDBPyConnection) -> None:
+    """
+    Save DataFrame to DuckDB.
+    """
+    connection.execute("CREATE TABLE IF NOT EXISTS rankings AS SELECT * FROM df")
+    connection.execute("INSERT INTO rankings SELECT * FROM df")
+
+def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
+    """
+    Upload a file to Cloudflare R2.
+    """
+    s3 = boto3.client('s3',
+                      endpoint_url=os.environ['R2_ENDPOINT'],
+                      aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+                      aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+    
+    s3.upload_file(local_path, bucket_name, object_name)
+
+def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> None:
+    """
+    Upload a file to Google Drive.
+    """
+    creds = Credentials.from_authorized_user_file('token.json', ['https://www.googleapis.com/auth/drive.file'])
+    service = build('drive', 'v3', credentials=creds)
+
+    file_metadata = {'name': file_name}
+    media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+
+
+
 def create_session() -> requests.Session:
     """
     Creates a requests session with retry capabilities and 
@@ -191,36 +246,53 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
 
 def save_data(df: pd.DataFrame) -> None:
     """
-    Append the data to consolidated_rankings.csv with a timestamp column
+    Save data to local CSV, DuckDB (local, R2), and Google Drive.
     """
     if df.empty:
         print("No data to save")
         return
-    
+
     # Add scraped_datetime column with current timestamp
     current_time = datetime.now(timezone.utc)
     df['scraped_datetime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Path to the consolidated CSV file
+
+    # Local CSV - primary storage that should always work
     csv_path = "consolidated_rankings.csv"
-    
-    # Check if file exists to determine if we need to write headers
-    file_exists = os.path.isfile(csv_path)
-    
-    # If file exists, read it and append new data
-    if file_exists:
-        existing_df = pd.read_csv(csv_path)
-        combined_df = pd.concat([existing_df, df], ignore_index=True)
-    else:
-        combined_df = df
-    
-    # Sort by scraped_datetime and rank
+    existing_df = get_consolidated_data()
+    combined_df = pd.concat([existing_df, df], ignore_index=True)
     combined_df = combined_df.sort_values(by=['scraped_datetime', 'rank'])
-    
-    # Save to CSV
     combined_df.to_csv(csv_path, index=False)
-    
-    print(f"Data appended to {csv_path}")
+    print(f"Data successfully saved to local CSV: {csv_path}")
+
+    # Try to save to local DuckDB
+    try:
+        with duckdb.connect('rankings.db') as conn:
+            save_to_duckdb(combined_df, conn)
+        print("Data successfully saved to local DuckDB")
+    except Exception as e:
+        print(f"Failed to save to local DuckDB: {e}")
+
+    # Try to upload to R2
+    try:
+        upload_to_r2('rankings.db', 'your-r2-bucket', 'rankings.db')
+        print("Data successfully uploaded to R2")
+    except Exception as e:
+        print(f"Failed to upload to R2: {e}")
+
+    # Try to upload DuckDB to Google Drive
+    try:
+        upload_to_google_drive('rankings.db', 'rankings.db', 'application/octet-stream')
+        print("DuckDB file successfully uploaded to Google Drive")
+    except Exception as e:
+        print(f"Failed to upload DuckDB to Google Drive: {e}")
+
+    # Try to upload CSV to Google Drive
+    try:
+        upload_to_google_drive(csv_path, 'consolidated_rankings.csv', 'text/csv')
+        print("CSV backup successfully uploaded to Google Drive")
+    except Exception as e:
+        print(f"Failed to upload CSV to Google Drive: {e}")
+
     print(f"\nDataset Summary:")
     print(f"- Total rankings in this scrape: {len(df)}")
     print(f"- Total rankings in consolidated file: {len(combined_df)}")
