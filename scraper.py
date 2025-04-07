@@ -156,7 +156,7 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
     top_rank = next((city for city in rankings if city.get('rank') == 1), rankings[0])
     
     # Format the data according to the specified structure
-    current_time = datetime.now().strftime(":%d %b %Y, %I:%M %p")
+    current_time = datetime.now().strftime("%d %b %Y, %I:%M %p")
     
     # Extract country code from flag URL
     country_code = "unknown"
