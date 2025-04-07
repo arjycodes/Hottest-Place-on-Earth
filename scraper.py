@@ -14,6 +14,7 @@ from urllib3.util.retry import Retry
 import duckdb
 import boto3
 from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 from io import BytesIO
@@ -54,14 +55,17 @@ def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
 
 def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> None:
     """
-    Upload a file to Google Drive.
+    Upload a file to Google Drive using a service account.
     """
-    creds = Credentials.from_authorized_user_file('google_credentials.json', ['https://www.googleapis.com/auth/drive.file'])
-    service = build('drive', 'v3', credentials=creds)
-
+    credentials = service_account.Credentials.from_service_account_file(
+        'google_credentials.json',
+        scopes=['https://www.googleapis.com/auth/drive.file']
+    )
+    service = build('drive', 'v3', credentials=credentials)
     file_metadata = {'name': file_name}
     media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
     file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    print(f"File ID: {file.get('id')}")
 
 
 
