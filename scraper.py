@@ -261,11 +261,9 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folde
         print(f"Successfully uploaded new version of {file_name} (ID: {new_file_id})")
         
         # Step 2: Find and delete ALL older versions with the same name throughout Drive
-        query = f"name = '{file_name}' and not id = '{new_file_id}'"
-        # Notice the folder_id condition has been removed to search all locations
-            
+        query = f"name = '{file_name}'"
         results = service.files().list(q=query, fields="files(id, name)").execute()
-        old_files = results.get('files', [])
+        old_files = [f for f in results.get('files', []) if f['id'] != new_file_id]
         
         for old_file in old_files:
             try:
@@ -278,6 +276,7 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folde
     except Exception as e:
         print(f"Failed to upload {file_name} to Google Drive: {e}")
         raise
+
 
 def save_data(df: pd.DataFrame) -> None:
     """
