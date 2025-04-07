@@ -233,7 +233,7 @@ def upload_to_r2(local_path: str, bucket_name: str, object_name: str) -> None:
     
     s3.upload_file(local_path, bucket_name, object_name)
 
-def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> None:
+def upload_to_google_drive(file_path: str, file_name: str, mime_type: str, folder_id: str = None) -> None:
     """
     Upload a file to Google Drive using a service account.
     First uploads the new version, then deletes any previous versions with the same name.
@@ -248,6 +248,9 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> No
         
         # Step 1: Upload the new file first
         file_metadata = {'name': file_name}
+        if folder_id:
+            file_metadata['parents'] = [folder_id]
+            
         media = MediaIoBaseUpload(BytesIO(open(file_path, 'rb').read()), mimetype=mime_type, resumable=True)
         new_file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         new_file_id = new_file.get('id')
@@ -257,8 +260,10 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> No
             
         print(f"Successfully uploaded new version of {file_name} (ID: {new_file_id})")
         
-        # Step 2: Find and delete older versions with the same name
+        # Step 2: Find and delete ALL older versions with the same name throughout Drive
         query = f"name = '{file_name}' and id != '{new_file_id}'"
+        # Notice the folder_id condition has been removed to search all locations
+            
         results = service.files().list(q=query, fields="files(id, name)").execute()
         old_files = results.get('files', [])
         
@@ -273,9 +278,6 @@ def upload_to_google_drive(file_path: str, file_name: str, mime_type: str) -> No
     except Exception as e:
         print(f"Failed to upload {file_name} to Google Drive: {e}")
         raise
-
-
-
 
 def save_data(df: pd.DataFrame) -> None:
     """
