@@ -191,33 +191,39 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
 
 def save_data(df: pd.DataFrame) -> None:
     """
-    Save the data to CSV and JSON files in the Data folder
+    Append the data to consolidated_rankings.csv with a timestamp column
     """
     if df.empty:
         print("No data to save")
         return
     
-    # Create Data folder if it doesn't exist
-    data_folder = "Data"
-    if not os.path.exists(data_folder):
-        os.makedirs(data_folder)
+    # Add scraped_datetime column with current timestamp
+    current_time = datetime.now()
+    df['scraped_datetime'] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
-    # Add timestamp to filenames
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    # Path to the consolidated CSV file
+    csv_path = "consolidated_rankings.csv"
     
-    # Save CSV
-    csv_path = os.path.join(data_folder, f"rankings_{timestamp}.csv")
-    df.to_csv(csv_path, index=False)
-    print(f"Full data saved to {csv_path}")
+    # Check if file exists to determine if we need to write headers
+    file_exists = os.path.isfile(csv_path)
     
-    # Save JSON
-    json_path = os.path.join(data_folder, f"rankings_{timestamp}.json")
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(df.to_dict('records'), f, indent=2, ensure_ascii=False)
-    print(f"Full data saved to {json_path}")
+    # If file exists, read it and append new data
+    if file_exists:
+        existing_df = pd.read_csv(csv_path)
+        combined_df = pd.concat([existing_df, df], ignore_index=True)
+    else:
+        combined_df = df
     
+    # Sort by scraped_datetime and rank
+    combined_df = combined_df.sort_values(by=['scraped_datetime', 'rank'])
+    
+    # Save to CSV
+    combined_df.to_csv(csv_path, index=False)
+    
+    print(f"Data appended to {csv_path}")
     print(f"\nDataset Summary:")
-    print(f"- Total rankings: {len(df)}")
+    print(f"- Total rankings in this scrape: {len(df)}")
+    print(f"- Total rankings in consolidated file: {len(combined_df)}")
     print(f"- Columns: {', '.join(df.columns.tolist()[:10])}...")
 
 def main() -> None:
