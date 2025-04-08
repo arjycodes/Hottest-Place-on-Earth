@@ -195,12 +195,16 @@ def save_top_rank_data(rankings: List[Dict[str, Any]]) -> None:
     if 'flag' in top_rank:
         flag_url = top_rank.get('flag', '')
         country_code = flag_url.split('/')[-1].split('.')[0]
-    
+
     # Get temperature with degree symbol
     temp_c = "N/A"
     if 'weather' in top_rank and 'temp_c' in top_rank['weather']:
-        temp_c = f"{top_rank['weather']['temp_c']} \u00b0C"
-    
+        try:
+            rounded_temp = round(float(top_rank['weather']['temp_c'])) #Rounding temp
+            temp_c = f"{rounded_temp} \u00b0C"
+        except (ValueError, TypeError):
+            temp_c = "N/A"
+
     # Get condition text
     condition = "Unknown"
     if 'weather' in top_rank and 'condition' in top_rank['weather']:
