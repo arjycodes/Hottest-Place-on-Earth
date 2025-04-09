@@ -12,7 +12,7 @@
   }
   
   html {
-    overscroll-behavior-y: contain; /* Keep this - it's good for controlling bounce */
+    overscroll-behavior-y: auto; /* Keep this - it's good for controlling bounce */
   }
   
   body {
