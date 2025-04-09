@@ -16,7 +16,7 @@ function updateDisplay(data) {
     document.getElementById('condition').textContent = data.condition;
     document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated}`;
     
-    document.title = `${data.temperature} in ${data.city} - Hottest Place on Earth`;
+    document.title = `${data.temperature} in ${data.city} - Hottest Place on Earth Right Now`;
 }
 
 // Initial fetch when page loads
