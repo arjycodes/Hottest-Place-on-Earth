@@ -11,7 +11,7 @@ async function fetchHottestPlace() {
 function updateDisplay(data) {
     // Update content on the page
     document.getElementById('city').textContent = `${data.city}, ${data.country}`;
-    document.getElementById('flag').src = `https://flagcdn.com/w160/${data.countryCode.toLowerCase()}.webp`;
+    document.getElementById('flag').src = `https://flagcdn.com/w320/${data.countryCode.toLowerCase()}.webp`;
     document.getElementById('flag').alt = `${data.country} flag`;
     document.getElementById('temperature').textContent = data.temperature;
     document.getElementById('condition').textContent = data.condition;
