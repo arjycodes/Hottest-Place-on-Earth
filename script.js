@@ -20,6 +20,17 @@ function updateDisplay(data) {
     // Update the page title
     document.title = `${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
 
+    // Dynamically generate the weather icon URL
+    const weatherIcon = document.getElementById('weather-icon');
+    const baseURL = "https://www.aqi.in/media/weather-icons/";
+    const conditionSlug = data.condition.toLowerCase().replace(/\s+/g, "-"); // Convert condition to lowercase slug
+    weatherIcon.src = `${baseURL}${conditionSlug}.svg`; // Build the dynamic URL
+    weatherIcon.alt = `${data.condition} icon`; // Set the alt attribute
+
+    weatherIcon.onerror = () => {
+        weatherIcon.src = `${baseURL}sunny.svg`; // Default icon
+    };
+    
     // Dynamically update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
