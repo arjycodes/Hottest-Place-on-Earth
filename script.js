@@ -29,7 +29,7 @@ function updateDisplay(data) {
     document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated}`;
 
     // Update the page title
-    document.title = `${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
+    // document.title = `${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
 
     // Dynamically generate the weather icon URL
     const weatherIcon = document.getElementById('weather-icon');
@@ -43,16 +43,16 @@ function updateDisplay(data) {
     };
     
     // Dynamically update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-        metaDescription.content = `The hottest place on Earth right now is ${data.city}, ${data.country}, with a temperature of ${data.temperature} and conditions described as ${data.condition}.`;
-    }
+    // const metaDescription = document.querySelector('meta[name="description"]');
+    // if (metaDescription) {
+    //     metaDescription.content = `The hottest place on Earth right now is ${data.city}, ${data.country}, with a temperature of ${data.temperature} and conditions described as ${data.condition}.`;
+    // }
 
     // Dynamically update meta keywords
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-        metaKeywords.content = `hottest place on earth, ${data.city}, ${data.country}, ${data.temperature}, live updates`;
-    }
+    // const metaKeywords = document.querySelector('meta[name="keywords"]');
+    // if (metaKeywords) {
+    //     metaKeywords.content = `hottest place on earth, ${data.city}, ${data.country}, ${data.temperature}, live updates`;
+    // }
 }
 
 
