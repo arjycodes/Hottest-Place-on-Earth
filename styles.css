@@ -6,7 +6,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
+    background: linear-gradient(135deg, #ffcc70 0%, #ff8260 100%); /*Hot gradient*/
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -24,6 +25,7 @@ body {
     width: 600px;
     margin: 1rem;
 }
+
 
 h1 {
     font-size: 1.8rem;
@@ -48,7 +50,7 @@ h1 {
 }
 
 #flag {
-    width: 40px;
+    width: 60px;
     height: auto;
     border-radius: 5px;
 }
