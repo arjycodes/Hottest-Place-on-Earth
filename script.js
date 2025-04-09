@@ -1,3 +1,22 @@
+// Add this to your script.js file
+document.addEventListener('touchmove', function(e) {
+    // Check if the scroll position is at the top
+    if (window.scrollY === 0) {
+      // Allow scrolling (for pull-to-refresh) only when at the top
+      return;
+    }
+    // Otherwise prevent scrolling
+    e.preventDefault();
+  }, { passive: false });
+  
+  // Set the height initially
+  setMobileViewportHeight();
+  
+  // Reset on resize and orientation change
+  window.addEventListener('resize', setMobileViewportHeight);
+  window.addEventListener('orientationchange', setMobileViewportHeight);
+
+
 // Add this at the beginning of your script.js file
 function setMobileViewportHeight() {
     // First we get the viewport height and multiply it by 1% to get a value for a vh unit
