@@ -1,3 +1,18 @@
+// Add this at the beginning of your script.js file
+function setMobileViewportHeight() {
+    // First we get the viewport height and multiply it by 1% to get a value for a vh unit
+    let vh = window.innerHeight * 0.01;
+    // Then we set the value in the --vh custom property to the root of the document
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  
+  // Set the height initially
+  setMobileViewportHeight();
+  
+  // Reset on resize and orientation change
+  window.addEventListener('resize', setMobileViewportHeight);
+  window.addEventListener('orientationchange', setMobileViewportHeight);
+
 async function fetchHottestPlace() {
     try {
         const response = await fetch('data.json?' + new Date().getTime());;

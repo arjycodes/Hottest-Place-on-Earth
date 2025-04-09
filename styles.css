@@ -7,28 +7,27 @@
   html, body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    height: 100%; /* Ensure the body fills the viewport */
-    overflow: auto;
+    height: 100%; /* Keep this consistent */
+    overflow: hidden; /* Prevent default scrolling */
   }
   
   html {
-    overscroll-behavior-y: contain; /* Controls bounce effect while allowing pull-to-refresh */
+    overscroll-behavior-y: contain; /* Keep this - it's good for controlling bounce */
   }
   
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: transparent;
-    min-height: 100vh;
     display: flex;
     justify-content: center;
-    flex-direction: column; /* Stack content */
     align-items: center;
-    padding: 1rem; /* Prevent content from touching screen edges */
+    padding: 0; /* Remove padding that causes overflow */
     color: #333;
-    overflow-y: auto; /* Allow vertical scrolling */
-    overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative;
+    height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+    height: calc(var(--vh, 1vh) * 100);
+    /* Removed min-height declaration that causes overflow */
+    /* Removed overflow declarations as we're using overflow: hidden on html, body */
   }
   
   body:before {
