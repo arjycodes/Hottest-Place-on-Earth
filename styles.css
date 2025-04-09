@@ -8,7 +8,7 @@ html, body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: auto; /* Prevent scrolling */
     height: 100%; /* Ensure the body fills the viewport */
 }
 
