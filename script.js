@@ -9,15 +9,30 @@ async function fetchHottestPlace() {
 }
 
 function updateDisplay(data) {
+    // Update content on the page
     document.getElementById('city').textContent = `${data.city}, ${data.country}`;
     document.getElementById('flag').src = `https://flagcdn.com/w160/${data.countryCode.toLowerCase()}.webp`;
     document.getElementById('flag').alt = `${data.country} flag`;
     document.getElementById('temperature').textContent = data.temperature;
     document.getElementById('condition').textContent = data.condition;
     document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated}`;
-    
-    document.title = `${data.temperature} in ${data.city} - Hottest Place on Earth Right Now`;
+
+    // Update the page title
+    document.title = `${data.temperature} in ${data.city} - Hottest Place on Earth`;
+
+    // Dynamically update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+        metaDescription.content = `The hottest place on Earth right now is ${data.city}, ${data.country}, with a temperature of ${data.temperature} and conditions described as ${data.condition}.`;
+    }
+
+    // Dynamically update meta keywords
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+        metaKeywords.content = `hottest place on earth, ${data.city}, ${data.country}, ${data.temperature}, live updates`;
+    }
 }
+
 
 // Initial fetch when page loads
 fetchHottestPlace();
