@@ -18,7 +18,7 @@ function updateDisplay(data) {
     document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated}`;
 
     // Update the page title
-    document.title = `🔥 ${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
+    document.title = `${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
 
     // Dynamically update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
