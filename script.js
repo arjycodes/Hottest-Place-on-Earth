@@ -8,13 +8,6 @@ document.addEventListener('touchmove', function(e) {
     // Otherwise prevent scrolling
     e.preventDefault();
   }, { passive: false });
-  
-  // Set the height initially
-  setMobileViewportHeight();
-  
-  // Reset on resize and orientation change
-  window.addEventListener('resize', setMobileViewportHeight);
-  window.addEventListener('orientationchange', setMobileViewportHeight);
 
 async function fetchHottestPlace() {
     try {
