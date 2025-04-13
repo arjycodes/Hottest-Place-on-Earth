@@ -26,7 +26,7 @@ function updateDisplay(data) {
     document.getElementById('flag').alt = `${data.country} flag`;
     document.getElementById('temperature').textContent = data.temperature;
     document.getElementById('condition').textContent = data.condition;
-    document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated}`;
+    document.getElementById('updated').textContent = `Last updated: ${data.lastUpdated} UTC`;
 
     // Update the page title
     // document.title = `${data.temperature} in ${data.city} - The Hottest Place on Earth Right Now`;
