@@ -42,19 +42,7 @@ function updateDisplay(data) {
         weatherIcon.src = `${baseURL}sunny.svg`; // Default icon
     };
     
-    // Dynamically update meta description
-    // const metaDescription = document.querySelector('meta[name="description"]');
-    // if (metaDescription) {
-    //     metaDescription.content = `The hottest place on Earth right now is ${data.city}, ${data.country}, with a temperature of ${data.temperature} and conditions described as ${data.condition}.`;
-    // }
-
-    // Dynamically update meta keywords
-    // const metaKeywords = document.querySelector('meta[name="keywords"]');
-    // if (metaKeywords) {
-    //     metaKeywords.content = `hottest place on earth, ${data.city}, ${data.country}, ${data.temperature}, live updates`;
-    // }
 }
-
 
 // Initial fetch when page loads
 fetchHottestPlace();
